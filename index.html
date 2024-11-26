@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Model Palu dengan Three.js</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+    canvas {
+      display: block;
+    }
+    .info-text {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      color: white;
+      z-index: 100;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.110.0/examples/js/loaders/MTLLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.110.0/examples/js/loaders/OBJLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.110.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.6/dat.gui.min.js"></script>
+</head>
+<body>
+  <div class="info-text">
+    NAMA: MUHAMMAD FAYYADH RAHINDA <br>
+    NRP: 5025221224
+  </div>
+
+<script>
+  // Setup scene, camera, and renderer
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true; // Enable shadows
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Soft shadows
+  document.body.appendChild(renderer.domElement);
+
+  // Orbit Controls for camera movement
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+  // Background color - using a gradient for a smoother, aesthetic background
+  const textureLoader = new THREE.TextureLoader();
+  const bgTexture = textureLoader.load('https://www.transparenttextures.com/patterns/soft-wallpaper.png');
+  scene.background = bgTexture;
+
+  // Load MTL and OBJ
+  const mtlLoader = new THREE.MTLLoader();
+  mtlLoader.load('Hammer.mtl', (materials) => {
+    materials.preload();
+    const objLoader = new THREE.OBJLoader();
+    objLoader.setMaterials(materials);
+    objLoader.load(
+      'Hammer.obj', // Path ke file .obj
+      (object) => {
+        object.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+            child.material = new THREE.MeshStandardMaterial({
+              color: 0xA0A0A0,
+              roughness: 0.3,
+              metalness: 0.5,
+              map: new THREE.TextureLoader().load('hammer.png'),
+            });
+          }
+        });
+        object.position.set(0, 1, 0);
+        object.scale.set(1, 1, 1);
+        scene.add(object);
+      },
+      (xhr) => {
+        console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
+      },
+      (error) => {
+        console.error('An error happened', error);
+      }
+    );
+  });
+
+  // Add ground plane for shadow
+  const planeGeometry = new THREE.PlaneGeometry(20, 20);
+  const planeMaterial = new THREE.ShadowMaterial({ opacity: 0.5 });
+  const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+  plane.rotation.x = -Math.PI / 2;
+  plane.position.y = -2;
+  plane.receiveShadow = true;
+  scene.add(plane);
+
+  // Lights
+  const ambientLight = new THREE.AmbientLight(0x404040, 2);
+  scene.add(ambientLight);
+
+  // Directional Light (Main light)
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 3);
+  directionalLight.position.set(5, 5, 5).normalize();
+  directionalLight.castShadow = true;
+  directionalLight.shadow.mapSize.width = 1024;
+  directionalLight.shadow.mapSize.height = 1024;
+  directionalLight.shadow.camera.near = 0.5;
+  directionalLight.shadow.camera.far = 50;
+  directionalLight.shadow.camera.left = -10;
+  directionalLight.shadow.camera.right = 10;
+  directionalLight.shadow.camera.top = 10;
+  directionalLight.shadow.camera.bottom = -10;
+  scene.add(directionalLight);
+
+  // Point Light (Interactive lamp)
+  const pointLight = new THREE.PointLight(0xffffff, 2, 100);
+  pointLight.position.set(5, 5, 5);
+  pointLight.castShadow = true;
+  pointLight.shadow.mapSize.width = 512;
+  pointLight.shadow.mapSize.height = 512;
+  scene.add(pointLight);
+
+  // Create GUI for controlling the light
+  const gui = new dat.GUI();
+  const lightFolder = gui.addFolder('Lamp Controls');
+  lightFolder.add(pointLight.position, 'x', -10, 10).name('Lamp X');
+  lightFolder.add(pointLight.position, 'y', 0, 10).name('Lamp Y');
+  lightFolder.add(pointLight.position, 'z', -10, 10).name('Lamp Z');
+  lightFolder.add(pointLight, 'intensity', 0, 5).name('Lamp Intensity');
+  lightFolder.open();
+
+  // Set camera position
+  camera.position.set(0, 3, 5);
+  camera.lookAt(0, 1, 0);
+
+  // Render loop
+  function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+  }
+
+  animate();
+
+  // Resize handling
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+</script>
+</body>
+</html>
