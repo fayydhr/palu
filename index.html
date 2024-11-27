@@ -42,17 +42,15 @@
   const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.shadowMap.enabled = true; // Enable shadows
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Soft shadows
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   document.body.appendChild(renderer.domElement);
 
   // Orbit Controls for camera movement
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
 
-  // Background color - using a gradient for a smoother, aesthetic background
-  const textureLoader = new THREE.TextureLoader();
-  const bgTexture = textureLoader.load('https://www.transparenttextures.com/patterns/soft-wallpaper.png');
-  scene.background = bgTexture;
+  // Background color - set to white
+  scene.background = new THREE.Color('white');
 
   // Load MTL and OBJ
   const mtlLoader = new THREE.MTLLoader();
@@ -61,7 +59,7 @@
     const objLoader = new THREE.OBJLoader();
     objLoader.setMaterials(materials);
     objLoader.load(
-      'Hammer.obj', // Path ke file .obj
+      'Hammer.obj',
       (object) => {
         object.traverse((child) => {
           if (child.isMesh) {
@@ -101,24 +99,16 @@
   const ambientLight = new THREE.AmbientLight(0x404040, 2);
   scene.add(ambientLight);
 
-  // Directional Light (Main light)
+  // Directional Light (disable shadow)
   const directionalLight = new THREE.DirectionalLight(0xffffff, 3);
   directionalLight.position.set(5, 5, 5).normalize();
-  directionalLight.castShadow = true;
-  directionalLight.shadow.mapSize.width = 1024;
-  directionalLight.shadow.mapSize.height = 1024;
-  directionalLight.shadow.camera.near = 0.5;
-  directionalLight.shadow.camera.far = 50;
-  directionalLight.shadow.camera.left = -10;
-  directionalLight.shadow.camera.right = 10;
-  directionalLight.shadow.camera.top = 10;
-  directionalLight.shadow.camera.bottom = -10;
+  directionalLight.castShadow = false; // Disable shadow for directional light
   scene.add(directionalLight);
 
-  // Point Light (Interactive lamp)
+  // Point Light (Interactive lamp with shadow)
   const pointLight = new THREE.PointLight(0xffffff, 2, 100);
   pointLight.position.set(5, 5, 5);
-  pointLight.castShadow = true;
+  pointLight.castShadow = true; // Enable shadow for point light
   pointLight.shadow.mapSize.width = 512;
   pointLight.shadow.mapSize.height = 512;
   scene.add(pointLight);
