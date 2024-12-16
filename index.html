@@ -8,7 +8,7 @@
     body {
       margin: 0;
       overflow: hidden;
-      color: white;
+      color: rgb(255, 0, 0);
       font-family: Arial, sans-serif;
     }
     canvas {
@@ -20,7 +20,7 @@
       left: 20px;
       font-size: 24px;
       font-weight: bold;
-      color: white;
+      color: rgb(255, 0, 0);
       z-index: 100;
     }
   </style>
@@ -119,7 +119,7 @@
   lightFolder.add(pointLight.position, 'x', -10, 50).name('Lamp X');
   lightFolder.add(pointLight.position, 'y', 0, 50).name('Lamp Y');
   lightFolder.add(pointLight.position, 'z', -10, 50).name('Lamp Z');
-  lightFolder.add(pointLight, 'intensity', 0, 50).name('Lamp Intensity');
+  lightFolder.add(pointLight, 'intensity', 0, ).name('Lamp Intensity');
   lightFolder.open();
 
   // Set camera position
